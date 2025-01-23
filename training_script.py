@@ -9,7 +9,7 @@ import numpy as np
 
 # Fetch the data
 def fetch_historical_data():
-    project = hopsworks.login(api_key_value="CfEguTsh4ZmL50zX.XacymCLSjFjetGdkZ5kGRr5RMu4cMe0NVT7zFQKLE2E8pjsilqVhLbFZOj3YX3CE")
+    project = hopsworks.login(api_key_value="HW_API_KEY")
     fs = project.get_feature_store()
     feature_group_name = "air_quality_features_f_cleaned"
     feature_group_version = 1
@@ -76,7 +76,7 @@ import numpy as np
 
 # Fetch the data
 def fetch_historical_data():
-    project = hopsworks.login(api_key_value="CfEguTsh4ZmL50zX.XacymCLSjFjetGdkZ5kGRr5RMu4cMe0NVT7zFQKLE2E8pjsilqVhLbFZOj3YX3CE")
+    project = hopsworks.login(api_key_value="HW_API_KEY")
     fs = project.get_feature_store()
     feature_group_name = "air_quality_features_f_cleaned"
     feature_group_version = 1
@@ -93,9 +93,9 @@ def fetch_historical_data():
 historical_data = fetch_historical_data()
 
 if historical_data is not None:
-    # historical_data = historical_data.replace(-9999, np.nan).dropna()
-    # from scipy.stats import zscore
-    # historical_data = historical_data[(np.abs(zscore(historical_data[['pm25', 'pm10']])) < 3).all(axis=1)]
+    historical_data = historical_data.replace(-9999, np.nan).dropna()
+    from scipy.stats import zscore
+    historical_data = historical_data[(np.abs(zscore(historical_data[['pm25', 'pm10']])) < 3).all(axis=1)]
 
     # Preprocessing
     X = historical_data.drop(["future_aqi", "id"], axis=1, errors="ignore")  # Drop target and ID
@@ -148,7 +148,7 @@ model_dir = "models"
 os.makedirs(model_dir, exist_ok=True)
 
 import hopsworks
-project = hopsworks.login(api_key_value="CfEguTsh4ZmL50zX.XacymCLSjFjetGdkZ5kGRr5RMu4cMe0NVT7zFQKLE2E8pjsilqVhLbFZOj3YX3CE")
+project = hopsworks.login(api_key_value='HW_API_KEY')
 mr = project.get_model_registry()
 
 #exporting ridge regression model to model dir
