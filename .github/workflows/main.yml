@@ -1,0 +1,45 @@
+name: Scheduled Scripts
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+    - cron: "0 0 * * *"
+
+jobs:
+  run-feature-script:
+    name: Run Feature Script
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 * * * *' # Runs only for the hourly schedule
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Feature Script
+        run: python feature_script.py  
+
+  run-training-script:
+    name: Run Training Script
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 0 * * *' # Runs only for the daily schedule
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Training Script
+        run: python training_script.py  
