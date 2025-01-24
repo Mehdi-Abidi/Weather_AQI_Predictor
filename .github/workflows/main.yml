@@ -5,8 +5,8 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 * * * *"
-    - cron: "0 0 * * *"
+    - cron: "0 * * * *"  # Runs every hour for feature script
+    - cron: "0 0 * * *"  # Runs daily for training script
 
 jobs:
   run-feature-script:
@@ -26,6 +26,8 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run Feature Script
+        env:
+          OW_API_KEY: ${{ secrets.OW_API_KEY }}  # Pass OW_API_KEY as an environment variable
         run: python feature_script.py  
 
   run-training-script:
@@ -45,4 +47,6 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run Training Script
-        run: python training_script.py  
+        env:
+          HW_API_KEY: ${{ secrets.HW_API_KEY }}  # Pass HW_API_KEY as an environment variable
+        run: python training_script.py
