@@ -1,5 +1,5 @@
 #Model #1
-
+import os
 from math import sqrt
 import hopsworks
 from sklearn.model_selection import train_test_split
@@ -9,7 +9,7 @@ import numpy as np
 
 # Fetch the data
 def fetch_historical_data():
-    project = hopsworks.login(api_key_value="HW_API_KEY")
+    project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
     fs = project.get_feature_store()
     feature_group_name = "air_quality_features_f_cleaned"
     feature_group_version = 1
@@ -76,7 +76,7 @@ import numpy as np
 
 # Fetch the data
 def fetch_historical_data():
-    project = hopsworks.login(api_key_value="HW_API_KEY")
+    project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
     fs = project.get_feature_store()
     feature_group_name = "air_quality_features_f_cleaned"
     feature_group_version = 1
@@ -148,7 +148,7 @@ model_dir = "models"
 os.makedirs(model_dir, exist_ok=True)
 
 import hopsworks
-project = hopsworks.login(api_key_value='HW_API_KEY')
+project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
 mr = project.get_model_registry()
 
 #exporting ridge regression model to model dir
