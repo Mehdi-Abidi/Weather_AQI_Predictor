@@ -159,7 +159,7 @@ joblib.dump(model, model_path)
 model_path = os.path.join(model_dir, "rf_model.json")
 joblib.dump(rf_model, model_path)
 
-model_dir = "/content/models"
+model_dir = "models"
 model_files = [f for f in os.listdir(model_dir) if f.endswith(".json")]
 
 for model_file in model_files:
