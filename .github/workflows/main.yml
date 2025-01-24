@@ -1,6 +1,9 @@
 name: Scheduled Scripts
 
 on:
+  push:  # Runs immediately after a push to the main branch
+    branches:
+      - main
   schedule:
     - cron: "0 * * * *"  # Runs every hour for feature script
     - cron: "0 0 * * *"  # Runs daily for training script
@@ -20,7 +23,9 @@ jobs:
           python-version: "3.x"
 
       - name: Install Dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install -U 'hopsworks[python]' --quiet
 
       - name: Run Feature Script
         env:
@@ -42,7 +47,9 @@ jobs:
           python-version: "3.x"
 
       - name: Install Dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install -U 'hopsworks[python]' --quiet
 
       - name: Run Training Script
         env:
