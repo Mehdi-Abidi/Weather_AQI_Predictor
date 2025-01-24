@@ -32,7 +32,7 @@ def store_data(df):
 
     try:
         # Login to Hopsworks
-        project = hopsworks.login(api_key_value='HW_API_KEY') 
+        project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY")) 
         fs = project.get_feature_store()
 
         # Feature group details
