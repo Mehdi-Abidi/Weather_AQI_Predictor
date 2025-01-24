@@ -25,6 +25,7 @@ jobs:
       - name: Run Feature Script
         env:
           OW_API_KEY: ${{ secrets.OW_API_KEY }}  # Pass OW_API_KEY as an environment variable
+          HW_API_KEY: ${{ secrets.HW_API_KEY }}  # Pass HW_API_KEY as an environment variable
         run: python feature_script.py  
 
   run-training-script:
