@@ -1,6 +1,9 @@
 name: Scheduled Scripts
 
 on:
+  push:  # Runs immediately after a push to the main branch
+    branches:
+      - main
   schedule:
     - cron: "0 * * * *"
     - cron: "0 0 * * *"
