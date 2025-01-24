@@ -33,7 +33,7 @@ jobs:
   run-training-script:
     name: Run Training Script
     runs-on: ubuntu-latest
-    if: github.event.schedule == '0 0 * * *' # Runs only for the daily schedule
+    # if: github.event.schedule == '0 0 * * *' # Runs only for the daily schedule
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
