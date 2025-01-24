@@ -1,9 +1,6 @@
 name: Scheduled Scripts
 
 on:
-  push:  # Runs immediately after a push to the main branch
-    branches:
-      - main
   schedule:
     - cron: "0 * * * *"  # Runs every hour for feature script
     - cron: "0 0 * * *"  # Runs daily for training script
@@ -12,7 +9,7 @@ jobs:
   run-feature-script:
     name: Run Feature Script
     runs-on: ubuntu-latest
-    # if: github.event.schedule == '0 * * * *' # Runs only for the hourly schedule
+    if: github.event.schedule == '0 * * * *' # Runs only for the hourly schedule
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -33,7 +30,7 @@ jobs:
   run-training-script:
     name: Run Training Script
     runs-on: ubuntu-latest
-    # if: github.event.schedule == '0 0 * * *' # Runs only for the daily schedule
+    if: github.event.schedule == '0 0 * * *' # Runs only for the daily schedule
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
