@@ -6,9 +6,10 @@ import numpy as np
 import hopsworks
 from requests.exceptions import RequestException
 from scipy.stats import zscore
+import os
  
 # API = 'OW_API_KEY' # OpenWeather API key
-API = secrets.OW_API_KEY
+API = os.getenv("OW_API_KEY")
 URL = "http://api.openweathermap.org/data/2.5/air_pollution/history?lat=24.8607&lon=67.0011&start={start}&end={end}&appid={API}"  # Karachi city coordinates
 
 def fetch_data(api, s, e):
