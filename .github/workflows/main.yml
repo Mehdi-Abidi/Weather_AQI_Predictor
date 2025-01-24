@@ -23,7 +23,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run Feature Script
-        run: python feature_script.py  # Replace with the actual script name
+        run: python feature_script.py  
 
   run-training-script:
     name: Run Training Script
@@ -42,4 +42,4 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run Training Script
-        run: python training_script.py  # Replace with the actual script name
+        run: python training_script.py  
