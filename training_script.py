@@ -1,20 +1,27 @@
-#Model #1
 import os
 from math import sqrt
 import hopsworks
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import Ridge
-from sklearn.metrics import mean_squared_error, r2_score,mean_absolute_error,root_mean_squared_error
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    classification_report,
+    confusion_matrix
+)
 import numpy as np
+from scipy.stats import zscore
 
-# Fetch the data
 def fetch_historical_data():
     project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
     fs = project.get_feature_store()
-    feature_group_name = "air_quality_features_f_cleaned"
+    feature_group_name = "air_quality_features_f_3"
     feature_group_version = 1
 
     try:
+        # Retrieve data from the feature group
         feature_group = fs.get_feature_group(name=feature_group_name, version=feature_group_version)
         historical_data = feature_group.read()
         print("Fetched historical data successfully!")
@@ -22,6 +29,20 @@ def fetch_historical_data():
     except Exception as e:
         print(f"Failed to fetch historical data: {e}")
         return None
+
+def correlation(dataset, threshold):
+    col_corr = set()
+    numeric_df = dataset.select_dtypes(include=['int64', 'float64'])
+    corr_matrix = numeric_df.corr()
+
+    for i in range(len(corr_matrix.columns)):
+        for j in range(i):
+            if abs(corr_matrix.iloc[i, j]) < threshold:
+                colname = corr_matrix.columns[i]
+                if colname != 'future_aqi':
+                    col_corr.add(colname)
+    return col_corr
+
 def save_to_hopsworks(data, project, feature_group_name, version, description):
     try:
         fs = project.get_feature_store()
@@ -37,17 +58,18 @@ def save_to_hopsworks(data, project, feature_group_name, version, description):
         print(f"Data saved to feature group: {feature_group_name}")
     except Exception as e:
         print(f"Failed to save data: {e}")
-        
+
 historical_data = fetch_historical_data()
-from scipy.stats import zscore
-historical_data = historical_data[(np.abs(zscore(historical_data[['pm25', 'pm10']])) < 3).all(axis=1)]
+
 if historical_data is not None:
+    # Remove outliers based on z-scores
+    historical_data = historical_data[(np.abs(zscore(historical_data[['pm25', 'pm10']])) < 3).all(axis=1)]
+
     project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
 
     # Separate rows with NaN values in the target column
     rows_with_nan = historical_data[historical_data["future_aqi"].isna()]
-    # print(rows_with_nan)
-    rows_without_nan = historical_data.dropna(subset=["future_aqi"]).dropna()
+    historical_data.dropna(inplace=True)
 
     # Save rows with NaN to a new feature group
     save_to_hopsworks(
@@ -57,8 +79,69 @@ if historical_data is not None:
         version=1,
         description="Rows with NaN values for future AQI prediction"
     )
-    X = rows_without_nan.drop(["future_aqi", "id"], axis=1, errors="ignore")
-    y = rows_without_nan["future_aqi"]
+
+    df1 = historical_data.copy()
+    corrfeatures = correlation(df1, 0.06)  
+    df1.drop(columns=corrfeatures, inplace=True)
+
+    if df1 is not None:
+        # Preprocessing
+        X = df1.drop(["future_aqi", "id"], axis=1, errors="ignore")  # Drop target and ID
+        y = df1["future_aqi"]
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=11)
+
+        # Train Logistic Regression Model
+        linear_model = LogisticRegression()
+        linear_model.fit(X_train, y_train)
+
+        train_predictions = linear_model.predict(X_train)
+        test_predictions = linear_model.predict(X_test)
+
+        # Evaluate on the test set
+        accuracy = accuracy_score(y_test, test_predictions)
+        precision = precision_score(y_test, test_predictions, average="weighted")  # Weighted for multiclass
+        recall = recall_score(y_test, test_predictions, average="weighted")
+        f1 = f1_score(y_test, test_predictions, average="weighted")
+
+        # Display metrics
+        print(f"Accuracy: {accuracy:.4f}")
+        print(f"Precision: {precision:.4f}")
+        print(f"Recall: {recall:.4f}")
+        print(f"F1 Score: {f1:.4f}")
+
+        # Classification report (optional, for a detailed view per class)
+        print("\nClassification Report:")
+        print(classification_report(y_test, test_predictions))
+
+        # Confusion matrix
+        print("\nConfusion Matrix:")
+        cm = confusion_matrix(y_test, test_predictions)
+        print(cm)
+    else:
+        print("No data available for training.")
+
+#Model #2
+import os
+from math import sqrt
+import hopsworks
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import RidgeClassifier
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    classification_report,
+    confusion_matrix
+)
+import numpy as np
+
+
+if df1 is not None:
+    project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
+    X = df1.drop(["future_aqi", "id"], axis=1, errors="ignore")
+    y = df1["future_aqi"]
 
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=11)
@@ -70,73 +153,66 @@ results = []
 
 # Iterate through each alpha and fit the Ridge model
 for alpha in alphas:
-    model = Ridge(alpha=alpha)
+    model = RidgeClassifier(alpha=alpha)
     model.fit(X_train, y_train)
 
-    # Predict on test data
-    test_predictions = model.predict(X_test)
     train_predictions = model.predict(X_train)
-    # Calculate MSE and R²
-    mae_train = mean_absolute_error(y_train, train_predictions)
-    mae_test = mean_absolute_error(y_test, test_predictions)
-    mse_train = mean_squared_error(y_train, train_predictions)
-    mse_test = mean_squared_error(y_test, test_predictions)
-    rmse_train = root_mean_squared_error(y_train, train_predictions)
-    rmse_test = root_mean_squared_error(y_test, test_predictions)
-    r2_test = model.score(X_test, y_test)  # R² score
+    test_predictions = model.predict(X_test)
 
-    # Save results
-    results.append((alpha,mse_train,mse_test,mae_train,mae_test,rmse_train,rmse_test,r2_test))
+    # Evaluate on the test set
+    print("Evaluation for alpha value : ", alpha)
+    print("\n\n")
+    accuracy = accuracy_score(y_test, test_predictions)
+    precision = precision_score(y_test, test_predictions, average="weighted")  # Weighted for multiclass
+    recall = recall_score(y_test, test_predictions, average="weighted")
+    f1 = f1_score(y_test, test_predictions, average="weighted")
 
-# Display the results
-print("Ridge Regression Results:")
-for alpha,mse_train,mse,maet,mae,rmset,rmse,r2 in results:
-    #rootmse = sqrt(mse)
-    print(f"Alpha: {alpha}, Train MSE: {mse_train:.6f}, Test MSE: {mse:.6f}, Train MAE: {maet:.6f}, Test MAE: {mae:.6f}, Train RMSE: {rmset:.6f}, Test RMSE:{rmse:.6f},  Test R²: {r2:.7f}")
+    # Display metrics
+    print(f"Accuracy: {accuracy:.4f}")
+    print(f"Precision: {precision:.4f}")
+    print(f"Recall: {recall:.4f}")
+    print(f"F1 Score: {f1:.4f}")
 
+    # Classification report (optional, for a detailed view per class)
+    print("\nClassification Report:")
+    print(classification_report(y_test, test_predictions))
 
-# Model 2
+    # Confusion matrix
+    print("\nConfusion Matrix:")
+    cm = confusion_matrix(y_test, test_predictions)
+    print(cm)
+else:
+    print("No data available for training.")
+
+# Model 3
 
 import hopsworks
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score,mean_absolute_error,root_mean_squared_error
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    classification_report,
+    confusion_matrix
+)
 from math import sqrt
 import numpy as np
 
-# Fetch the data
-def fetch_historical_data():
-    project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
-    fs = project.get_feature_store()
-    feature_group_name = "air_quality_features_f_cleaned"
-    feature_group_version = 1
 
-    try:
-        feature_group = fs.get_feature_group(name=feature_group_name, version=feature_group_version)
-        historical_data = feature_group.read()
-        print("Fetched historical data successfully!")
-        return historical_data
-    except Exception as e:
-        print(f"Failed to fetch historical data: {e}")
-        return None
-
-historical_data = fetch_historical_data()
-
-if historical_data is not None:
-    historical_data = historical_data.replace(-9999, np.nan).dropna()
-    from scipy.stats import zscore
-    historical_data = historical_data[(np.abs(zscore(historical_data[['pm25', 'pm10']])) < 3).all(axis=1)]
-    rows_without_nan = historical_data.dropna(subset=["future_aqi"]).dropna()
+if df1 is not None:
     
-    # Preprocessing
-    X = rows_without_nan.drop(["future_aqi", "id"], axis=1, errors="ignore")
-    y = rows_without_nan["future_aqi"]
+    
+    X = df1.drop(["future_aqi", "id"], axis=1, errors="ignore")  # Drop target and ID
+    y = df1["future_aqi"]
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=11)
 
     # Initialize the Random Forest model
-    rf_model = RandomForestRegressor(
-        n_estimators=200,  # Number of trees in the forest
-        max_depth=None,    # Maximum depth of each tree
+    rf_model = RandomForestClassifier(
+        n_estimators=300,  # Number of trees in the forest
+        max_depth=8,    # Maximum depth of each tree
         random_state=42    # Seed for reproducibility
     )
 
@@ -144,26 +220,33 @@ if historical_data is not None:
     rf_model.fit(X_train, y_train)
 
     # Predict on test data
-    test_predictions = rf_model.predict(X_test)
     train_predictions = rf_model.predict(X_train)
+    test_predictions = rf_model.predict(X_test)
 
-    # Evaluate the model
-    mae_train = mean_absolute_error(y_train, train_predictions)
-    mae_test = mean_absolute_error(y_test, test_predictions)
-    mse_train = mean_squared_error(y_train, train_predictions)
-    mse_test = mean_squared_error(y_test, test_predictions)
-    rmse_train = sqrt(mse_train)
-    rmse_test = sqrt(mse_test)
-    r2_test = rf_model.score(X_test, y_test)  # R² score
+    # Evaluate on the test set
+    accuracy = accuracy_score(y_test, test_predictions)
+    precision = precision_score(y_test, test_predictions, average="weighted")  # Weighted for multiclass
+    recall = recall_score(y_test, test_predictions, average="weighted")
+    f1 = f1_score(y_test, test_predictions, average="weighted")
 
-    # Display the results
-    print("Random Forest Results:")
-    print(f"Train MSE: {mse_train:.4f}, Test MSE: {mse_test:.4f}")
-    print(f"Train MAE: {mae_train:.4f}, Test MAE: {mae_test:.4f}")
-    print(f"Train RMSE: {rmse_train:.4f}, Test RMSE: {rmse_test:.4f}")
-    print(f"Test R²: {r2_test:.4f}")
+    # Display metrics
+    print(f"Accuracy: {accuracy:.4f}")
+    print(f"Precision: {precision:.4f}")
+    print(f"Recall: {recall:.4f}")
+    print(f"F1 Score: {f1:.4f}")
+
+    # Classification report (optional, for a detailed view per class)
+    print("\nClassification Report:")
+    print(classification_report(y_test, test_predictions))
+
+    # Confusion matrix
+    print("\nConfusion Matrix:")
+    cm = confusion_matrix(y_test, test_predictions)
+    print(cm)
 else:
-    print("No data fetched from the feature store.")
+    print("No data available for training.")
+
+
 
 
 
@@ -180,6 +263,10 @@ os.makedirs(model_dir, exist_ok=True)
 import hopsworks
 project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
 mr = project.get_model_registry()
+
+#exporting logistic regression
+model_path = os.path.join(model_dir, "linear_model.json")
+joblib.dump(linear_model, model_path)
 
 #exporting ridge regression model to model dir
 model_path = os.path.join(model_dir, "rr_model.json")
