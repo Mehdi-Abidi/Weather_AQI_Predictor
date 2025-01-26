@@ -7,6 +7,8 @@ import hopsworks
 from requests.exceptions import RequestException
 from scipy.stats import zscore
 import os
+
+
  
 # API = 'OW_API_KEY' # OpenWeather API key
 API = os.getenv("OW_API_KEY")
