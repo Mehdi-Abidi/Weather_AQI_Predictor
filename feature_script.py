@@ -148,5 +148,5 @@ def fetch_and_process_data(api, s, days):
 
 if __name__ == "__main__":
     start_date = datetime.datetime.today()
-    days = 5
+    days = 365
     fetch_and_process_data(API, start_date, days)
