@@ -17,7 +17,7 @@ from scipy.stats import zscore
 def fetch_historical_data():
     project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
     fs = project.get_feature_store()
-    feature_group_name = "air_quality_features_f_3"
+    feature_group_name = "air_quality_features_f_cleaned"
     feature_group_version = 1
 
     try:
