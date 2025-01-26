@@ -22,14 +22,44 @@ def fetch_historical_data():
     except Exception as e:
         print(f"Failed to fetch historical data: {e}")
         return None
-
+def save_to_hopsworks(data, project, feature_group_name, version, description):
+    try:
+        fs = project.get_feature_store()
+        feature_group = fs.get_feature_group(name=feature_group_name, version=version)
+        feature_group.delete()
+        feature_group = fs.get_or_create_feature_group(
+            name=feature_group_name,
+            version=version,
+            primary_key=["id"],
+            description=description
+        )
+        feature_group.insert(data)
+        print(f"Data saved to feature group: {feature_group_name}")
+    except Exception as e:
+        print(f"Failed to save data: {e}")
+        
 historical_data = fetch_historical_data()
 from scipy.stats import zscore
 historical_data = historical_data[(np.abs(zscore(historical_data[['pm25', 'pm10']])) < 3).all(axis=1)]
 if historical_data is not None:
-    # Preprocessing
-    X = historical_data.drop(["future_aqi", "id"], axis=1, errors="ignore")  # Drop target and ID
-    y = historical_data["future_aqi"]
+    project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
+
+    # Separate rows with NaN values in the target column
+    rows_with_nan = historical_data[historical_data["future_aqi"].isna()]
+    # print(rows_with_nan)
+    rows_without_nan = historical_data.dropna(subset=["future_aqi"]).dropna()
+
+    # Save rows with NaN to a new feature group
+    save_to_hopsworks(
+        rows_with_nan,
+        project,
+        "air_quality_nan_rows",
+        version=1,
+        description="Rows with NaN values for future AQI prediction"
+    )
+    X = rows_without_nan.drop(["future_aqi", "id"], axis=1, errors="ignore")
+    y = rows_without_nan["future_aqi"]
+
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=11)
 
@@ -96,11 +126,11 @@ if historical_data is not None:
     historical_data = historical_data.replace(-9999, np.nan).dropna()
     from scipy.stats import zscore
     historical_data = historical_data[(np.abs(zscore(historical_data[['pm25', 'pm10']])) < 3).all(axis=1)]
-
+    rows_without_nan = historical_data.dropna(subset=["future_aqi"]).dropna()
+    
     # Preprocessing
-    X = historical_data.drop(["future_aqi", "id"], axis=1, errors="ignore")  # Drop target and ID
-    y = historical_data["future_aqi"]
-
+    X = rows_without_nan.drop(["future_aqi", "id"], axis=1, errors="ignore")
+    y = rows_without_nan["future_aqi"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=11)
 
     # Initialize the Random Forest model
