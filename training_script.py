@@ -66,10 +66,13 @@ if historical_data is not None:
     historical_data = historical_data[(np.abs(zscore(historical_data[['pm25', 'pm10']])) < 3).all(axis=1)]
 
     project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
+    rows_with_nan = historical_data[historical_data["future_aqi"].isna()]
+    # print(rows_with_nan)
+    rows_without_nan = historical_data.dropna(subset=["future_aqi"]).dropna()
 
     # Separate rows with NaN values in the target column
-    rows_with_nan = historical_data[historical_data["future_aqi"].isna()]
-    historical_data.dropna(inplace=True)
+    # rows_with_nan = historical_data[historical_data["future_aqi"].isna()]
+    # historical_data.dropna(inplace=True)
 
     # Save rows with NaN to a new feature group
     save_to_hopsworks(
@@ -80,88 +83,29 @@ if historical_data is not None:
         description="Rows with NaN values for future AQI prediction"
     )
 
-    df1 = historical_data.copy()
-    corrfeatures = correlation(df1, 0.06)  
-    df1.drop(columns=corrfeatures, inplace=True)
+    # df1 = historical_data.copy()
+    # corrfeatures = correlation(df1, 0.06)  
+    # df1.drop(columns=corrfeatures, inplace=True)
 
-    if df1 is not None:
+    # if df1 is not None:
         # Preprocessing
-        X = df1.drop(["future_aqi", "id"], axis=1, errors="ignore")  # Drop target and ID
-        y = df1["future_aqi"]
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=11)
-
-        # Train Logistic Regression Model
-        linear_model = LogisticRegression()
-        linear_model.fit(X_train, y_train)
-
-        train_predictions = linear_model.predict(X_train)
-        test_predictions = linear_model.predict(X_test)
-
-        # Evaluate on the test set
-        accuracy = accuracy_score(y_test, test_predictions)
-        precision = precision_score(y_test, test_predictions, average="weighted")  # Weighted for multiclass
-        recall = recall_score(y_test, test_predictions, average="weighted")
-        f1 = f1_score(y_test, test_predictions, average="weighted")
-
-        # Display metrics
-        print(f"Accuracy: {accuracy:.4f}")
-        print(f"Precision: {precision:.4f}")
-        print(f"Recall: {recall:.4f}")
-        print(f"F1 Score: {f1:.4f}")
-
-        # Classification report (optional, for a detailed view per class)
-        print("\nClassification Report:")
-        print(classification_report(y_test, test_predictions))
-
-        # Confusion matrix
-        print("\nConfusion Matrix:")
-        cm = confusion_matrix(y_test, test_predictions)
-        print(cm)
-    else:
-        print("No data available for training.")
-
-#Model #2
-import os
-from math import sqrt
-import hopsworks
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import RidgeClassifier
-from sklearn.metrics import (
-    accuracy_score,
-    precision_score,
-    recall_score,
-    f1_score,
-    classification_report,
-    confusion_matrix
-)
-import numpy as np
-
-
-if df1 is not None:
-    project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
-    X = df1.drop(["future_aqi", "id"], axis=1, errors="ignore")
-    y = df1["future_aqi"]
-
+    X = rows_without_nan.drop(["future_aqi", "id"], axis=1, errors="ignore")
+    y = rows_without_nan["future_aqi"]
+    
+    # X = df1.drop(["future_aqi", "id"], axis=1, errors="ignore")  # Drop target and ID
+    # y = df1["future_aqi"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=11)
 
-    alphas = [0.001, 0.01, 0.1, 1, 10, 100, 1000]
+    # Train Logistic Regression Model
+    linear_model = LogisticRegression()
+    linear_model.fit(X_train, y_train)
 
-# Store results
-results = []
-
-# Iterate through each alpha and fit the Ridge model
-for alpha in alphas:
-    model = RidgeClassifier(alpha=alpha)
-    model.fit(X_train, y_train)
-
-    train_predictions = model.predict(X_train)
-    test_predictions = model.predict(X_test)
+    train_predictions = linear_model.predict(X_train)
+    test_predictions = linear_model.predict(X_test)
 
     # Evaluate on the test set
-    print("Evaluation for alpha value : ", alpha)
-    print("\n\n")
     accuracy = accuracy_score(y_test, test_predictions)
     precision = precision_score(y_test, test_predictions, average="weighted")  # Weighted for multiclass
     recall = recall_score(y_test, test_predictions, average="weighted")
@@ -181,8 +125,79 @@ for alpha in alphas:
     print("\nConfusion Matrix:")
     cm = confusion_matrix(y_test, test_predictions)
     print(cm)
+# else:
+#     print("No data available for training.")
+
+
+
+
+# Model #2
+import os
+from math import sqrt
+import hopsworks
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import RidgeClassifier
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    classification_report,
+    confusion_matrix
+)
+import numpy as np
+
+if historical_data is not None:
+    project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
+
+    X = rows_without_nan.drop(["future_aqi", "id"], axis=1, errors="ignore")
+    y = rows_without_nan["future_aqi"]
+
+    # X = df1.drop(["future_aqi", "id"], axis=1, errors="ignore")
+    # y = df1["future_aqi"]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=11)
+
+    alphas = [0.001, 0.01, 0.1, 1, 10, 100, 1000]
+
+    # Store results
+    results = []
+
+    # Iterate through each alpha and fit the Ridge model
+    for alpha in alphas:
+        model = RidgeClassifier(alpha=alpha)
+        model.fit(X_train, y_train)
+
+        train_predictions = model.predict(X_train)
+        test_predictions = model.predict(X_test)
+
+        # Evaluate on the test set
+        print("Evaluation for alpha value : ", alpha)
+        print("\n\n")
+        accuracy = accuracy_score(y_test, test_predictions)
+        precision = precision_score(y_test, test_predictions, average="weighted")  # Weighted for multiclass
+        recall = recall_score(y_test, test_predictions, average="weighted")
+        f1 = f1_score(y_test, test_predictions, average="weighted")
+
+        # Display metrics
+        print(f"Accuracy: {accuracy:.4f}")
+        print(f"Precision: {precision:.4f}")
+        print(f"Recall: {recall:.4f}")
+        print(f"F1 Score: {f1:.4f}")
+
+        # Classification report (optional, for a detailed view per class)
+        print("\nClassification Report:")
+        print(classification_report(y_test, test_predictions))
+
+        # Confusion matrix
+        print("\nConfusion Matrix:")
+        cm = confusion_matrix(y_test, test_predictions)
+        print(cm)
 else:
     print("No data available for training.")
+
+
+
 
 # Model 3
 
@@ -200,12 +215,11 @@ from sklearn.metrics import (
 from math import sqrt
 import numpy as np
 
-
-if df1 is not None:
-    
-    
-    X = df1.drop(["future_aqi", "id"], axis=1, errors="ignore")  # Drop target and ID
-    y = df1["future_aqi"]
+if historical_data is not None:
+    X = rows_without_nan.drop(["future_aqi", "id"], axis=1, errors="ignore")
+    y = rows_without_nan["future_aqi"]
+    # X = df1.drop(["future_aqi", "id"], axis=1, errors="ignore")  # Drop target and ID
+    # y = df1["future_aqi"]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=11)
 
@@ -245,6 +259,7 @@ if df1 is not None:
     print(cm)
 else:
     print("No data available for training.")
+
 
 
 
