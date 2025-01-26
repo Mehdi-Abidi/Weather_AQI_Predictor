@@ -96,11 +96,10 @@ def fetch_and_process_data(api, s, days):
     data.set_index("date", inplace=True)
 
     # Define Target
-    data["future_aqi"] = data["aqi"].shift(-1)  # Shift AQI to create a future prediction target
-    data.dropna(subset=["future_aqi"], inplace=True)  # Drop rows where target is NaN
-
+    data["future_aqi"] = data["aqi"].shift(-72)  # Shift AQI to create a future prediction target
     data.replace(-9999, np.nan, inplace=True)
-    data.fillna(data.median(), inplace=True)
+    features_to_fill = [col for col in data.columns if col != "future_aqi"]
+    data[features_to_fill] = data[features_to_fill].fillna(data[features_to_fill].median())
 
     # Log-transform skewed data
     data["pm25"] = np.log1p(data["pm25"])
@@ -132,8 +131,9 @@ def fetch_and_process_data(api, s, days):
 
     # Interaction Features
     data["pm25_pm10_ratio"] = data["pm25"] / (data["pm10"] + 1e-9)
-
-    data.dropna(inplace=True)
+    # Drop rows with NaN in features but retain NaN in 'future_aqi'
+    feature_columns = [col for col in data.columns if col != "future_aqi"]
+    data = data.dropna(subset=feature_columns)
     data.drop_duplicates(inplace=True)
 
     data.reset_index(drop=True, inplace=True)
