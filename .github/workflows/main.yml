@@ -3,7 +3,7 @@ name: Scheduled Scripts
 on:
   push:
     branches:
-        -main
+       -main
   schedule:
     - cron: "0 * * * *"  # Runs every hour for feature script
     - cron: "0 0 * * *"  # Runs daily for training script
