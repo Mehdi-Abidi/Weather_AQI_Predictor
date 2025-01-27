@@ -77,12 +77,13 @@ st.markdown("""
     .st-emotion-cache-ocqkz7{
             background:white;}
     .st-emotion-cache-1cvow4s{
-            all:unset}
+            all:unset;}
+    .stMarkdown{
+            all:unset;}
     .weather-box{
-            all:unset
-            width:50%}
+            all:unset;}
     .st-emotion-cache-o1a98x{
-            all:unset}  
+            all:unset;}  
     .metric-card {
         background: rgba(255, 255, 255, 0.8);
         border-radius: 8px;
