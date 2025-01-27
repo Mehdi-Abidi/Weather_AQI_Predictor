@@ -81,7 +81,8 @@ st.markdown("""
     .stMarkdown{
             all:unset;}
     .weather-box{
-            all:unset;}
+            all:unset;
+            width:50%;}
     .st-emotion-cache-o1a98x{
             all:unset;}  
     .metric-card {
