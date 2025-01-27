@@ -474,7 +474,7 @@ result_df = pd.DataFrame({
 
 result_df = result_df.sort_values(by=['id'])
 selected_data = result_df.iloc[::8]
-table_data = result_df.iloc[::24]
+table_data = result_df.iloc[[23, 47, 71]]
 
 print("These are the predictions in sorted order")
 print(result_df)
