@@ -53,14 +53,7 @@ st.markdown("""
         margin: 20px 0;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     }
-    .st-emotion-cache-ocqkz7{
-            background:white;}
-    .st-emotion-cache-1cvow4s{
-            all:unset}
-    .weather-box{
-            all:unset}
-    .st-emotion-cache-o1a98x{
-            all:unset}  
+
     .weather-box {
         background: rgba(0, 0, 0, 0.5);
         padding: 20px;
@@ -81,6 +74,15 @@ st.markdown("""
         gap: 10px;
         max-width: 400px;
     }
+    .st-emotion-cache-ocqkz7{
+            background:white;}
+    .st-emotion-cache-1cvow4s{
+            all:unset}
+    .weather-box{
+            all:unset
+            width:50%}
+    .st-emotion-cache-o1a98x{
+            all:unset}  
     .metric-card {
         background: rgba(255, 255, 255, 0.8);
         border-radius: 8px;
