@@ -320,18 +320,10 @@ if weather_data:
     humidity = weather_data["main"]["humidity"]
     wind_speed = weather_data["wind"]["speed"]
     pressure = weather_data["main"]["pressure"]
-    sunrise = weather_data["sys"]["sunrise"]
-    sunset = weather_data["sys"]["sunset"]
     current_time = weather_data["dt"]
 
-    # Determine if it is day or night
-    if sunrise <= current_time <= sunset:
-        icon_suffix = "d"
-    else:
-        icon_suffix = "n"
-
     # Weather icon URL
-    icon_url = f"https://openweathermap.org/img/wn/{weather_icon[:-1]}{icon_suffix}@4x.png"
+    icon_url = f"https://openweathermap.org/img/wn/{weather_icon}@4x.png"
 
     st.markdown("""
     <style>
@@ -520,11 +512,11 @@ df = pd.DataFrame(data)
 
 # Define AQI levels and corresponding colors
 aqi_levels = [
-    {"range": (1, 1), "color": "#47d627", "label": "Good"},
-    {"range": (2, 2), "color": "#e0e346", "label": "Fair"},
-    {"range": (3, 3), "color": "#f26638", "label": "Moderate"},
-    {"range": (4, 4), "color": "#e82a3a", "label": "Poor"},
-    {"range": (5, 5), "color": "#000000", "label": "Very Poor"}
+    {"range": (1, 1), "color": "rgb(75,209,84,0.3)", "label": "Good"},
+    {"range": (2, 2), "color": "#rgb(224,227,70,0.3)", "label": "Fair"},
+    {"range": (3, 3), "color": "rgb(242,102,56,0.3)", "label": "Moderate"},
+    {"range": (4, 4), "color": "rgb(232,42,58,0.3)", "label": "Poor"},
+    {"range": (5, 5), "color": "rgb(87,5,21,0.3)", "label": "Very Poor"}
 ]
 
 # Function to get color based on AQI value
@@ -543,13 +535,13 @@ fig = px.line(df, x='datetime', y='AQI', title='📈 AQI Trend for the Next 3 Da
               markers=True)
 
 # Update the trace to use the colors based on AQI levels
-fig.update_traces(marker=dict(color=df["color"], size=10), line=dict(color="#a0b0a4", width=2))
+fig.update_traces(marker=dict(color=df["color"], size=12,line=dict(color='rgba(0, 0, 0, 0.8)',width=2)), line=dict(color="#a0b0a4", width=2))
 
 # Update layout for better styling
 fig.update_layout(
-    title_font_size=24,
-    xaxis_title_font_size=18,
-    yaxis_title_font_size=18,
+    title_font_size=20,
+    xaxis_title_font_size=16,
+    yaxis_title_font_size=16,
     plot_bgcolor="rgba(0,0,0,0)",
     paper_bgcolor="rgba(255,255,255,0.1)",
     font=dict(color="white"),
@@ -558,13 +550,21 @@ fig.update_layout(
         gridcolor='rgba(255, 255, 255, 0.2)',  # Change this to your desired gridline color
         tickmode='array',
         tickvals=df['datetime'],
-        ticktext=df['datetime'].dt.strftime('%H:00 %d-%m-%Y')  # Show date and time
+        ticktext=df['datetime'].dt.strftime('%H:00 %d-%m-%Y'),  # Show date and time
+        tickfont=dict(size=12),  # Smaller tick label font size
+        tickson="labels"  # Align ticks with labels
     ),
     yaxis=dict(
         showgrid=True,
         gridcolor='rgba(255, 255, 255, 0.2)',  # Change this to your desired gridline color
-        range=[1, 5]
-    )
+        range=[0.5, 5.5],
+        tickmode='linear',
+        dtick=1
+    ),
+    autosize = True,
+    margin=dict(l=60, r=60, t=80, b=100),  # Adjusted margins
+    height=500,  # Set chart height
+    hovermode='x unified'  # Enhanced hover interaction
 )
 
 # Display the chart in Streamlit
@@ -616,7 +616,6 @@ st.markdown("""
 
 def main():
     # Initialize weather and AQI data first
-    weather_data = get_current_weather(24.8607, 67.0011, API_KEY)  # Get Karachi weather data
     current_aqi = aqi_data["current_aqi"].iloc[0]  # Get current AQI
 
     # Sidebar with conditional alerts
