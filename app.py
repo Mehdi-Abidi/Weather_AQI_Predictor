@@ -85,6 +85,9 @@ st.markdown("""
             width:50%;}
     .st-emotion-cache-o1a98x{
             all:unset;}  
+    .weather-box img {
+        width: 50%;
+    }
     .metric-card {
         background: rgba(255, 255, 255, 0.8);
         border-radius: 8px;
