@@ -9,7 +9,6 @@ import hopsworks
 import os
 import joblib
 
-
 # Fetch Current Weather Data
 def get_current_weather(latitude, longitude , api_key):
     base_url = "https://api.openweathermap.org/data/2.5/weather"
