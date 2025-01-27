@@ -10,8 +10,6 @@ import os
 import joblib
 
 
-
-
 # Fetch Current Weather Data
 def get_current_weather(latitude, longitude , api_key):
     base_url = "https://api.openweathermap.org/data/2.5/weather"
@@ -475,7 +473,7 @@ result_df = pd.DataFrame({
 })
 
 result_df = result_df.sort_values(by=['id'])
-selected_data = result_df.iloc[::8]
+selected_data = result_df.iloc[[7, 15, 23, 31, 39, 47, 55, 63, 71]]
 table_data = result_df.iloc[[23, 47, 71]]
 
 print("These are the predictions in sorted order")
@@ -521,7 +519,7 @@ st.markdown("</div>", unsafe_allow_html=True)
 
 # Sample data for AQI levels for the next 3 days with every 8-hour interval
 data = {
-    "datetime": pd.date_range(start=pd.Timestamp.now(), periods=9, freq='8h'),
+    "datetime": selected_data["datetime"],
     "AQI": selected_data["3_day_future_aqi"].values,
 }
 
