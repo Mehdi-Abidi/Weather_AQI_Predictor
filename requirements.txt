@@ -4,5 +4,5 @@ pandas-gbq>=0.26.1
 pandas-stubs>=2.2.2.240909
 numpy>=1.21.0
 scikit-learn>=1.6.0
-"hopsworks[python]"
+hopsworks[python]
 plotly>=5.0.0
