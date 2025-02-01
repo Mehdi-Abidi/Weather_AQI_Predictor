@@ -1,8 +1,7 @@
-pandas==2.2.3
-pandas-datareader==0.10.0
-pandas-gbq==0.26.1
-pandas-stubs==2.2.3.241126
-numpy==1.26.4
-scikit-learn==1.6.1
-hopsworks==3.7.0
-plotly==5.18.0
+pandas>=2.1.4
+pandas-datareader>=0.10.0
+pandas-gbq>=0.26.1
+pandas-stubs>=2.2.2.240909
+numpy>=1.21.0
+scikit-learn>=1.6.0
+plotly>=5.0.0
