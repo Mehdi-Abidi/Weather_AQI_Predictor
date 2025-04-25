@@ -623,8 +623,8 @@ else:
 st.write("---")
 st.markdown("""
 <div class="footer">
-    <p>📘 <i>This app is powered by machine learning and OpenWeather API.</i></p>
-    <p>Made with ❤️</p>
+    <p><i></i></p>
+    <p></p>
 </div>
 """, unsafe_allow_html=True)
 
