@@ -413,8 +413,8 @@ if historical_data is not None:
     
 # ---------------------------------------------------------------------------------------------------------------------------------
 
-# project = hopsworks.login(api_key_value="CfEguTsh4ZmL50zX.XacymCLSjFjetGdkZ5kGRr5RMu4cMe0NVT7zFQKLE2E8pjsilqVhLbFZOj3YX3CE")
-project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
+project = hopsworks.login(api_key_value="CfEguTsh4ZmL50zX.XacymCLSjFjetGdkZ5kGRr5RMu4cMe0NVT7zFQKLE2E8pjsilqVhLbFZOj3YX3CE")
+# project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
 mr = project.get_model_registry()
 
 retrieved_model_dir = "retrieved_models"
