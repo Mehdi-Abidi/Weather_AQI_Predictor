@@ -150,6 +150,6 @@ def fetch_and_process_data(api, s, days):
 
 if __name__ == "__main__":
     start_date = datetime.datetime.today()
-    # days = 365
-    days = 50
+    days = 365
+    # days = 50
     fetch_and_process_data(API, start_date, days)
