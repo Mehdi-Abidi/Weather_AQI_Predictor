@@ -3,6 +3,6 @@ pandas-datareader>=0.10.0
 pandas-gbq>=0.26.1
 pandas-stubs>=2.2.2.240909
 numpy>=1.21.0
-scikit-learn>=1.6.0
+scikit-learn>=1.6.1
 plotly>=5.0.0
 hopsworks>=3.3.0
