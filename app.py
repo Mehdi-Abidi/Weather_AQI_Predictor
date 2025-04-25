@@ -391,8 +391,8 @@ if weather_data:
 # --------------------------------------------------------------------
 
 def fetch_historical_data():
-    # project = hopsworks.login(api_key_value="CfEguTsh4ZmL50zX.XacymCLSjFjetGdkZ5kGRr5RMu4cMe0NVT7zFQKLE2E8pjsilqVhLbFZOj3YX3CE")
-    project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
+    project = hopsworks.login(api_key_value="CfEguTsh4ZmL50zX.XacymCLSjFjetGdkZ5kGRr5RMu4cMe0NVT7zFQKLE2E8pjsilqVhLbFZOj3YX3CE")
+    # project = hopsworks.login(api_key_value=os.getenv("HW_API_KEY"))
     
     fs = project.get_feature_store()
     feature_group_name = "air_quality_nan_rows"
