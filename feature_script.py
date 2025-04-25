@@ -44,14 +44,14 @@ def store_data(df):
         primary_key = ['id']
         online_enabled = False
 
-        try:
-            # Attempt to retrieve the feature group
-            feature_group = fs.get_feature_group(name=feature_group_name, version=feature_group_version)
-            feature_group.delete()
-            print(f"Existing feature group '{feature_group_name}' deleted.")
-        except AttributeError:
-            print("Error: The FeatureStore object does not have the required methods.")
-            return
+        # try:
+        #     # Attempt to retrieve the feature group
+        #     feature_group = fs.get_feature_group(name=feature_group_name, version=feature_group_version)
+        #     feature_group.delete()
+        #     print(f"Existing feature group '{feature_group_name}' deleted.")
+        # except AttributeError:
+        #     print("Error: The FeatureStore object does not have the required methods.")
+        #     return
 
         # Create and insert data into the feature group
         feature_group = fs.create_feature_group(
