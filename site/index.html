@@ -42,6 +42,7 @@
   <section class="panel" aria-labelledby="h-trend">
     <div class="panel-head">
       <div>
+        <p class="kicker">01 · Forecast</p>
         <h2 id="h-trend">The last 60 days, and the next three</h2>
         <p class="note">Daily mean PM2.5 in µg/m³. Whiskers on the forecast show its typical error on a year of unseen days.</p>
       </div>
@@ -60,6 +61,7 @@
     <div class="panel" aria-labelledby="h-skill">
       <div class="panel-head">
         <div>
+          <p class="kicker">02 · Accuracy</p>
           <h2 id="h-skill">Error against the baseline</h2>
           <p class="note">Mean absolute error in µg/m³ on the held-out year. Lower is better.</p>
         </div>
@@ -73,6 +75,7 @@
     </div>
 
     <div class="panel prose" aria-labelledby="h-how">
+      <p class="kicker">Method</p>
       <h2 id="h-how">How it works</h2>
       <ol class="steps">
         <li><strong>Collect.</strong> Hourly pollutant estimates and daily weather for Karachi come from the free Open-Meteo APIs, which serve the CAMS global model.</li>
@@ -83,9 +86,11 @@
     </div>
   </section>
 
-  <section class="panel" aria-labelledby="h-back">
+  <section class="band" aria-labelledby="h-back">
+    <div class="panel">
     <div class="panel-head">
       <div>
+        <p class="kicker">03 · Backtest</p>
         <h2 id="h-back">A year the model never saw</h2>
         <p class="note">Three-day-ahead forecasts against what happened, <span id="back-range"></span>. Trained only on earlier days.</p>
       </div>
@@ -96,10 +101,15 @@
     </div>
     <div class="chart" id="chart-back"></div>
     <details class="table-view"><summary>Show the data as a table</summary><div class="table-scroll" id="table-back"></div></details>
+    </div>
+  <svg class="skyline" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 120V84h38V62h30v22h26V48h44v36h22V70h34v14h30V40h18V26h10v14h18v44h40V58h52v26h24V72h30v12h46V52h20c0-16 12-28 28-28s28 12 28 28h20v32h36V64h44v20h28V44h36v40h30V68h42v16h34V56h26V38h14v18h26v28h40V74h38v10h44V60h48v24h30V78h36v6h38V50h30v34h46V66h52v54z"/>
+  </svg>
   </section>
 
   <section class="split">
     <div class="panel prose">
+      <p class="kicker">04 · Honest notes</p>
       <h2>What did not work</h2>
       <ul class="plain">
         <li>The 2024 version classified the AQI category with a random train and test split. It scored 79 percent, and so did a model that always answered "very poor", because 177 of 225 test rows had that label.</li>
@@ -109,6 +119,7 @@
       </ul>
     </div>
     <div class="panel prose">
+      <p class="kicker">Caveats</p>
       <h2>Read this before trusting it</h2>
       <ul class="plain">
         <li>The values are model estimates for the grid cell around Karachi, about 40 km wide. They are not readings from a ground station.</li>
