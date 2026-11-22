@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Karachi Air: a three-day PM2.5 forecast</title>
+<meta name="description" content="A daily PM2.5 forecast for Karachi, three days ahead, with its measured error against a persistence baseline.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="hero" id="hero">
+  <canvas id="haze" aria-hidden="true"></canvas>
+  <nav class="topbar">
+    <span class="brand"><span class="brand-dot"></span>Karachi Air</span>
+    <span class="topbar-right">
+      <a href="https://github.com/Mehdi-Abidi/Weather_AQI_Predictor">GitHub</a>
+      <button id="theme" class="ghost" type="button" aria-label="Switch between light and dark theme">Theme</button>
+    </span>
+  </nav>
+
+  <div class="hero-grid">
+    <div class="hero-now">
+      <p class="eyebrow" id="now-date">Latest full day</p>
+      <p class="hero-figure"><span id="now-value">--</span><span class="unit">µg/m³</span></p>
+      <p class="hero-sub">Daily mean PM2.5 <span class="chip" id="now-band"></span></p>
+      <h1>Karachi's air, three days ahead.</h1>
+      <p class="lede">A Random Forest reads the last week of pollution and weather and forecasts the daily mean PM2.5 for the next three days. It retrains every morning. Its error is published below, next to the error of simply assuming tomorrow looks like today.</p>
+    </div>
+    <div class="cards" id="cards" aria-label="Forecast for the next three days"></div>
+  </div>
+
+  <svg class="skyline" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 120V84h38V62h30v22h26V48h44v36h22V70h34v14h30V40h18V26h10v14h18v44h40V58h52v26h24V72h30v12h46V52h20c0-16 12-28 28-28s28 12 28 28h20v32h36V64h44v20h28V44h36v40h30V68h42v16h34V56h26V38h14v18h26v28h40V74h38v10h44V60h48v24h30V78h36v6h38V50h30v34h46V66h52v54z"/>
+  </svg>
+</header>
+
+<main>
+  <section class="panel" aria-labelledby="h-trend">
+    <div class="panel-head">
+      <div>
+        <h2 id="h-trend">The last 60 days, and the next three</h2>
+        <p class="note">Daily mean PM2.5 in µg/m³. Whiskers on the forecast show its typical error on a year of unseen days.</p>
+      </div>
+      <ul class="legend" aria-label="Legend">
+        <li><span class="key key-line s1"></span>Observed</li>
+        <li><span class="key key-dot s2"></span>Forecast</li>
+      </ul>
+    </div>
+    <div class="chart" id="chart-trend"></div>
+    <details class="table-view"><summary>Show the data as a table</summary><div class="table-scroll" id="table-trend"></div></details>
+  </section>
+
+  <section class="tiles" aria-label="Forecast quality at a glance" id="tiles"></section>
+
+  <section class="split">
+    <div class="panel" aria-labelledby="h-skill">
+      <div class="panel-head">
+        <div>
+          <h2 id="h-skill">Error against the baseline</h2>
+          <p class="note">Mean absolute error in µg/m³ on the held-out year. Lower is better.</p>
+        </div>
+        <ul class="legend" aria-label="Legend">
+          <li><span class="key key-box s2"></span>Model</li>
+          <li><span class="key key-box s3"></span>Persistence</li>
+        </ul>
+      </div>
+      <div class="chart" id="chart-skill"></div>
+      <details class="table-view"><summary>Show the data as a table</summary><div class="table-scroll" id="table-skill"></div></details>
+    </div>
+
+    <div class="panel prose" aria-labelledby="h-how">
+      <h2 id="h-how">How it works</h2>
+      <ol class="steps">
+        <li><strong>Collect.</strong> Hourly pollutant estimates and daily weather for Karachi come from the free Open-Meteo APIs, which serve the CAMS global model.</li>
+        <li><strong>Describe.</strong> Each day becomes 41 numbers: the last seven days of PM2.5, rolling means, other pollutants, wind, humidity, rain, pressure and the time of year.</li>
+        <li><strong>Forecast.</strong> One Random Forest per horizon predicts the daily mean one, two and three days ahead.</li>
+        <li><strong>Check.</strong> The models are scored on a full year they never trained on, against a baseline that repeats today's value.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-back">
+    <div class="panel-head">
+      <div>
+        <h2 id="h-back">A year the model never saw</h2>
+        <p class="note">Three-day-ahead forecasts against what happened, <span id="back-range"></span>. Trained only on earlier days.</p>
+      </div>
+      <ul class="legend" aria-label="Legend">
+        <li><span class="key key-line s1"></span>Observed</li>
+        <li><span class="key key-line s2"></span>Forecast, made 3 days earlier</li>
+      </ul>
+    </div>
+    <div class="chart" id="chart-back"></div>
+    <details class="table-view"><summary>Show the data as a table</summary><div class="table-scroll" id="table-back"></div></details>
+  </section>
+
+  <section class="split">
+    <div class="panel prose">
+      <h2>What did not work</h2>
+      <ul class="plain">
+        <li>The 2024 version classified the AQI category with a random train and test split. It scored 79 percent, and so did a model that always answered "very poor", because 177 of 225 test rows had that label.</li>
+        <li>Predicting the category directly never beat persistence once the split was by time.</li>
+        <li>Tuned XGBoost and LightGBM did not beat the Random Forest on this amount of data.</li>
+        <li>Even with perfect knowledge of the next three days of weather, R² only reaches about 0.47. Three days out, much of the variation is not predictable from this data.</li>
+      </ul>
+    </div>
+    <div class="panel prose">
+      <h2>Read this before trusting it</h2>
+      <ul class="plain">
+        <li>The values are model estimates for the grid cell around Karachi, about 40 km wide. They are not readings from a ground station.</li>
+        <li>The bands follow the OpenWeather PM2.5 scale: good below 10, fair below 25, moderate below 50, poor below 75, very poor from 75.</li>
+        <li>This is a student project and not a health advisory.</li>
+      </ul>
+      <p class="links"><a href="https://github.com/Mehdi-Abidi/Weather_AQI_Predictor/tree/main/evaluation">Method, tables and code</a><a href="https://open-meteo.com/">Data: Open-Meteo and CAMS</a></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Built by <a href="https://github.com/Mehdi-Abidi">Syed Muhammad Mehdi Abidi</a>. Updated <span id="updated">--</span>, trained on <span id="train-days">--</span> days since <span id="first-day">--</span>.</p>
+</footer>
+
+<div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body>
+</html>
