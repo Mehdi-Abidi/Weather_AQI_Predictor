@@ -255,6 +255,7 @@ function drawSkill(data) {
 function fillStatic(data) {
   const hero = document.getElementById("hero");
   hero.dataset.band = data.latest.band;
+  document.body.dataset.band = data.latest.band;
   document.getElementById("now-date").textContent = "Latest full day · " + fmtFull.format(asDate(data.latest.date));
   document.getElementById("now-value").textContent = data.latest.pm25.toFixed(0);
   document.getElementById("now-band").innerHTML = chip(data.latest.band, data.bands);
