@@ -1,0 +1,80 @@
+{
+ "horizon_1_day": {
+  "persistence": {
+   "mae": 5.01,
+   "rmse": 7.0,
+   "r2": 0.491
+  },
+  "xgboost": {
+   "mae": 4.6,
+   "rmse": 6.29,
+   "r2": 0.59,
+   "chosen": {
+    "learning_rate": 0.02,
+    "max_depth": 2,
+    "min_child_weight": 1,
+    "n_estimators": 300
+   }
+  },
+  "lightgbm": {
+   "mae": 4.62,
+   "rmse": 6.35,
+   "r2": 0.582,
+   "chosen": {
+    "learning_rate": 0.02,
+    "min_child_samples": 30,
+    "n_estimators": 300,
+    "num_leaves": 4
+   }
+  },
+  "random_forest": {
+   "mae": 4.56,
+   "rmse": 6.24,
+   "r2": 0.597,
+   "chosen": {
+    "max_features": 0.33,
+    "min_samples_leaf": 10,
+    "n_estimators": 500
+   }
+  }
+ },
+ "horizon_3_day": {
+  "persistence": {
+   "mae": 7.36,
+   "rmse": 9.88,
+   "r2": -0.027
+  },
+  "xgboost": {
+   "mae": 5.79,
+   "rmse": 7.72,
+   "r2": 0.374,
+   "chosen": {
+    "learning_rate": 0.02,
+    "max_depth": 2,
+    "min_child_weight": 5,
+    "n_estimators": 300
+   }
+  },
+  "lightgbm": {
+   "mae": 5.72,
+   "rmse": 7.63,
+   "r2": 0.388,
+   "chosen": {
+    "learning_rate": 0.02,
+    "min_child_samples": 30,
+    "n_estimators": 300,
+    "num_leaves": 4
+   }
+  },
+  "random_forest": {
+   "mae": 5.66,
+   "rmse": 7.56,
+   "r2": 0.399,
+   "chosen": {
+    "max_features": 0.33,
+    "min_samples_leaf": 10,
+    "n_estimators": 500
+   }
+  }
+ }
+}
