@@ -40,6 +40,8 @@ When the 3-day Random Forest forecast is mapped back to the OpenWeather PM2.5 ba
 
 Predicting the AQI category directly as a 5-class problem never beat persistence on macro-F1 under the time split, hourly or daily. A random split on the same data gave a Random Forest 84 percent accuracy, because neighbouring hours leak into both sides of the split. That number is not a forecast score and is not reported.
 
+Tuned gradient boosting did not help either. XGBoost and LightGBM, tuned with a 5-fold time-series split inside the training years, scored a 3-day MAE of 5.79 and 5.72, against 5.61 for the Random Forest above. One day ahead they scored 4.60 and 4.62, against 4.47 for Ridge. `boosting_comparison.py` reproduces this and writes `boosting_results.json`.
+
 ## Limits
 
 - Open-Meteo concentrations come from the CAMS global model, about 40 km resolution, and are estimates for the grid cell around Karachi. They are not readings from a ground station.
@@ -51,6 +53,7 @@ Predicting the AQI category directly as a 5-class problem never beat persistence
 ```bash
 pip install -r evaluation/requirements.txt
 python evaluation/pm25_forecast.py
+python evaluation/boosting_comparison.py
 ```
 
 The script prints the tables above and writes `evaluation/results.json`.
