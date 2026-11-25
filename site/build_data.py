@@ -61,9 +61,13 @@ def load(last_day):
     archive = get("https://archive-api.open-meteo.com/v1/archive", {
         "latitude": LAT, "longitude": LON, "daily": ",".join(WEATHER),
         "start_date": "2022-08-01", "end_date": str(last_day), "timezone": "Asia/Karachi"}, "daily")
-    recent = get("https://api.open-meteo.com/v1/forecast", {
-        "latitude": LAT, "longitude": LON, "daily": ",".join(WEATHER),
-        "past_days": 21, "forecast_days": 1, "timezone": "Asia/Karachi"}, "daily")
+    try:
+        recent = get("https://api.open-meteo.com/v1/forecast", {
+            "latitude": LAT, "longitude": LON, "daily": ",".join(WEATHER),
+            "past_days": 21, "forecast_days": 1, "timezone": "Asia/Karachi"}, "daily")
+    except RuntimeError as e:
+        print(f"Skipping recent weather: {e}", flush=True)
+        return daily, archive.sort_index()
     weather = archive.combine_first(recent[recent.index <= pd.Timestamp(last_day)]).sort_index()
     return daily, weather
 
