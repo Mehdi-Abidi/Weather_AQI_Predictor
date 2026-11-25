@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
@@ -31,10 +32,23 @@ def band(value):
     return len(BANDS) - 1
 
 
+def fetch(url, params, attempts=5):
+    for i in range(attempts):
+        try:
+            r = requests.get(url, params=params, timeout=(15, 90))
+            if r.status_code < 500 and r.status_code != 429:
+                r.raise_for_status()
+                return r.json()
+            print(f"{url} returned {r.status_code}, attempt {i + 1}/{attempts}", flush=True)
+        except (requests.ConnectionError, requests.Timeout) as e:
+            print(f"{url} failed ({type(e).__name__}), attempt {i + 1}/{attempts}", flush=True)
+        if i < attempts - 1:
+            time.sleep(min(15 * 2 ** i, 120))
+    raise RuntimeError(f"{url} failed after {attempts} attempts")
+
+
 def get(url, params, key):
-    r = requests.get(url, params=params, timeout=180)
-    r.raise_for_status()
-    df = pd.DataFrame(r.json()[key])
+    df = pd.DataFrame(fetch(url, params)[key])
     df["time"] = pd.to_datetime(df["time"])
     return df.set_index("time")
 
